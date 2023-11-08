@@ -45,8 +45,8 @@ public class PlaySound : MonoBehaviour
     }
 
     public void countdown() {
-        Invoke("stopSpawning", 25);
-        Invoke("showGameOverScene", 30);
+        Invoke("stopSpawning", 10);
+        Invoke("showGameOverScene", 15);
     }
     void stopSpawning() {
         FindObjectOfType<GenerateAsyncBeat>().CancelInvoke("spawnNextSet");

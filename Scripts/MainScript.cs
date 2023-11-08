@@ -38,7 +38,7 @@ public class MainScript : MonoBehaviour
         if (!PlayerPrefs.HasKey("bpm"))
         {
             PlayerPrefs.SetInt("bpm", 120);
-            PlayerPrefs.SetInt("lpr", 2);
+            PlayerPrefs.SetInt("lpr", 4);
             PlayerPrefs.SetInt("et", 1);
             PlayerPrefs.SetInt("glow", 1);
             PlayerPrefs.Save();
@@ -64,7 +64,7 @@ public class MainScript : MonoBehaviour
         }
     }
     private void setFromPrefs() {
-        levelProgressionRate = PlayerPrefs.GetInt("lpr");
+        levelProgressionRate = PlayerPrefs.GetInt("lpr")*2;
         bpm = PlayerPrefs.GetInt("bpm");
         extraTiles = intToBool(PlayerPrefs.GetInt("et"));
 
