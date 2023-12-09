@@ -6,15 +6,10 @@ public class PlaySound : MonoBehaviour
 {
     public int score = 0;
     public int maxScore = 0;
-    public int missedTilesNumber = 0;
-
-    [SerializeField]
-    GameObject RightStick;
-    [SerializeField]
-    GameObject LeftStick;
 
     MainScript MScript;
-    Darken DScript;
+    GenerateAsyncBeat GABScript;
+    ManageLighting MLScript;
 
     private bool extraSticks;
 
@@ -22,20 +17,21 @@ public class PlaySound : MonoBehaviour
    
     public int counter = 3;
     private int len;
-    private int timeWithAllTiles = 5;
+    private int timeWithAllTiles;
 
     public void start()
     {
         MScript = FindObjectOfType<MainScript>();
-        DScript = FindObjectOfType<Darken>();
+        GABScript = FindObjectOfType<GenerateAsyncBeat>();
+        MLScript = FindObjectOfType<ManageLighting>();
+
+        timeWithAllTiles = 15 + MScript.levelProgressionRate * 2;
 
         extraSticks = MScript.extraTiles;
 
             if (extraSticks)
             {
                 len = 5;
-                LeftStick.SetActive(true);
-                RightStick.SetActive(true);
             }
             else
             {
@@ -46,7 +42,7 @@ public class PlaySound : MonoBehaviour
     public void nextLevelRandomness(int currentLevel) {
         if (currentLevel >= len)
         {
-            FindObjectOfType<GenerateAsyncBeat>().CancelInvoke("levelUp");
+            GABScript.CancelInvoke("levelUp");
             countdown();
         }
     }
@@ -54,32 +50,31 @@ public class PlaySound : MonoBehaviour
     {
         if (currentLevel >= len)
         {
-            Debug.Log("currentLevel >= len");
-            FindObjectOfType<GenerateAsyncBeat>().CancelInvoke("levelUp");
-            Invoke("lightsOff", 10);
+            GABScript.CancelInvoke("levelUp");
+            Invoke("lightsOff", 5+2*MScript.levelProgressionRate);
         }
     }
 
-    public void lightsOff() {
-        FindObjectOfType<GenerateAsyncBeat>().startCheckingForMistakes();
-        DScript.startBlinking();
+    private void lightsOff() {
         Invoke("lightsOn", timeWithAllTiles);
+        GABScript.checkMistakes += GABScript.checkMistakesWhenAllTiles;
+        StartCoroutine(MLScript.backout());
         countdown();
     }
     public void lightsOn() {
-        DScript.lightsOn();
+        StartCoroutine(MLScript.lightout());
+        GABScript.checkMistakes -= GABScript.checkMistakesWhenAllTiles;
     }
     public void countdown() {
         Invoke("stopSpawning", timeWithAllTiles);
-        Invoke("showGameOverScene", timeWithAllTiles+5);
+        Invoke("showGameOverScene", timeWithAllTiles + 5);
     }
     void stopSpawning() {
-        FindObjectOfType<GenerateAsyncBeat>().CancelInvoke("InvokeSpawnNextSet");
+        GABScript.CancelInvoke("InvokeSpawnNextSet");
     }
     public void showGameOverScene() {
         canvas.SetActive(true);
-        Debug.Log((float)score / maxScore * 100);
 
-        //Debug.Log($"AFTER GAME: score: {FindObjectOfType<PlaySound>().score}; max score: {FindObjectOfType<PlaySound>().maxScore}");
+        FindObjectOfType<DisplayScore>().showScore((float)score / maxScore * 100);
     }
 }

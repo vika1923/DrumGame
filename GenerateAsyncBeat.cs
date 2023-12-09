@@ -18,19 +18,22 @@ public class GenerateAsyncBeat : MonoBehaviour
 	public List<int> frequences;
 	public int counter = 1;
 
-	private List<GameObject> mainTiles;
+
+    private List<GameObject> mainTiles;
 	private List<int> possibleFreqs;
 	public int level = 1;
 	private bool extraTiles;
 	private int levelProgressionRate;
 	private float spawnSpeed;
 	private GameObject[] tiles;
-	PlaySound PSScript;
+    public int missedTilesNumber = 0;
+
+    PlaySound PSScript;
 	MainScript MScript;
-	Darken DScript;
 
 	BlackoutGMode BOMScript;
 	RandomnessMode RMScript;
+	ManageLighting MLScript;
 
 	//  W, O, P = small || Q, space = big
 
@@ -44,32 +47,31 @@ public class GenerateAsyncBeat : MonoBehaviour
 		extraTiles = MScript.extraTiles;
 
 		PSScript = FindObjectOfType<PlaySound>();
-
-		BOMScript = FindObjectOfType<BlackoutGMode>();
+		MLScript = FindObjectOfType<ManageLighting>();
+        BOMScript = FindObjectOfType<BlackoutGMode>();
 		RMScript = FindObjectOfType<RandomnessMode>();
-		DScript = FindObjectOfType<Darken>();
 
 
 		frequences = new List<int> { };
+		
 
-		if (!extraTiles)
+        if (!extraTiles)
 		{
-			mainTiles = new List<GameObject> { tiles[2], tiles[1], tiles[3] };  //space, w, o
+            mainTiles = new List<GameObject> { tiles[2], tiles[1], tiles[3] };  //space, w, o
 			possibleFreqs = new List<int> {4, 8, 16};
 			addFreq();
 			frequences.Add(2);
 		}
 		else {
-
-			mainTiles = new List<GameObject> { tiles[0], tiles[1], tiles[2], tiles[3], tiles[4] };
+            mainTiles = new List<GameObject> { tiles[0], tiles[1], tiles[2], tiles[3], tiles[4] };
 			possibleFreqs = new List<int> {4, 4, 8, 8, 16};
 			addFreq();
 			frequences.Add(2);
 			addFreq();
 		}
 
-
-		if (PlayerPrefs.GetInt("gm") == 0)
+		
+		if (PlayerPrefs.GetInt("gm", 1) == 0)
 		{
 			modeTaskStart = RMScript.StartRandomness;
 			spawnNextSet = spawnNextSetRandomnessMode;
@@ -92,6 +94,7 @@ public class GenerateAsyncBeat : MonoBehaviour
 		frequences.Add(possibleFreqs[i]);
 		possibleFreqs.RemoveAt(i);
 	}
+
 
 	private void bubbleSort()
 	{
@@ -152,35 +155,21 @@ public class GenerateAsyncBeat : MonoBehaviour
 	{
 		for (int i = 0; i < level; i++)
 		{
-			if (counter % frequences[i] == 0)
+			if ((counter + BOMScript.offsets[i]) % frequences[i] == 0)
 			{
 				Instantiate(mainTiles[i]);
 			}
 		}
 		counter += 1;
-		checkMistakes();
+		checkMistakes?.Invoke();
 	}
 
-    public void startCheckingForMistakes()
-    {
-        Debug.Log("Check Started");
-        checkMistakes = checkMistakesWhenAllTiles;
-    }
-
-    private void checkMistakesWhenAllTiles() {
-        if (PSScript.missedTilesNumber >= 4)
-        {
-			Debug.Log("BAD");
-            PSScript.missedTilesNumber = 0;
-            DScript.lightsOn();
-        }
-        if (PSScript.missedTilesNumber <= -3)
-        {
-            Debug.Log("GOOD");
-            PSScript.missedTilesNumber = 0;
-            DScript.lightsOff();
-        }
-
+    public void checkMistakesWhenAllTiles() {
+		if (missedTilesNumber > 3)
+		{
+			MLScript.manyMistakes();
+			missedTilesNumber = 0;
+		}
     }
 
 	void levelUp()
@@ -196,6 +185,7 @@ public class GenerateAsyncBeat : MonoBehaviour
 		counter = 1;
 		PSScript.score = 0;
 		PSScript.maxScore = 0;
-		PSScript.missedTilesNumber = 0;
+		missedTilesNumber = 0;
+		FindObjectOfType<ManageLighting>().lightout();
 	}
 }

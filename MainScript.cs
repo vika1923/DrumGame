@@ -1,13 +1,11 @@
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
-using UnityEngine.SocialPlatforms.Impl;
 
 public class MainScript : MonoBehaviour
 {
     public float speed;     //(of tile movement). calculate automaticly.
 
     [SerializeField]
-    private float bpm;
+    public float bpm;
     public float SpawnSpeed;
 
     [SerializeField]
@@ -21,9 +19,6 @@ public class MainScript : MonoBehaviour
     [SerializeField]
     private GameObject tile4;
 
-    [SerializeField]
-    private PostProcessLayer PPLayer;
-
     public GameObject[] tiles;
 
     private GenerateAsyncBeat asyncBeat;
@@ -35,14 +30,6 @@ public class MainScript : MonoBehaviour
 
     void Start()
     {
-        if (!PlayerPrefs.HasKey("bpm"))
-        {
-            PlayerPrefs.SetInt("bpm", 120);
-            PlayerPrefs.SetInt("lpr", 4);
-            PlayerPrefs.SetInt("et", 1);
-            PlayerPrefs.SetInt("glow", 1);
-            PlayerPrefs.Save();
-        }
         setFromPrefs();
         Application.targetFrameRate = 60;
 
@@ -64,17 +51,9 @@ public class MainScript : MonoBehaviour
         }
     }
     private void setFromPrefs() {
-        levelProgressionRate = PlayerPrefs.GetInt("lpr")*2;
-        bpm = PlayerPrefs.GetInt("bpm");
-        extraTiles = intToBool(PlayerPrefs.GetInt("et"));
-
-        if (intToBool(PlayerPrefs.GetInt("glow")))
-        {
-            PPLayer.enabled = true;
-        }
-        else {
-            PPLayer.enabled = false;
-        }
+        levelProgressionRate = PlayerPrefs.GetInt("lpr", 4)*2;
+        bpm = PlayerPrefs.GetInt("bpm", 120);
+        extraTiles = intToBool(PlayerPrefs.GetInt("et", 1));
 
         //Debug.Log($"score: {FindObjectOfType<PlaySound>().score}; max score: {FindObjectOfType<PlaySound>().maxScore}");
 

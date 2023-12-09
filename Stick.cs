@@ -1,37 +1,34 @@
-
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Stick : MonoBehaviour
 {
-    PlaySound PScript;
-    [SerializeField]
-    private AudioSource audioSource;
-    [SerializeField]
-    private string key;
+    private int screenHeight;
 
-    private Vector3 pos;
+    public List<Touch> touches = new List<Touch>();
 
-    private void Awake()
+    private void Start()
     {
-        PScript = FindObjectOfType<PlaySound>();
-        pos = transform.position;
+        screenHeight = Screen.height / 4;
     }
-    // Update is called once per frame
+
     void Update()
     {
-        if (Input.GetKeyDown(key)) {
-            PlayClip();
-        }   
-    }
+        for (int i = 0; i < Input.touchCount; i++) {
+            if (Input.touches[i].phase == TouchPhase.Began && Input.touches[i].position.y < screenHeight)
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.touches[i].position);
+                RaycastHit hit;
 
-    void PlayClip()
-    {
-        transform.position = new Vector3(pos.x, 0.5f, pos.z);
-        Invoke("goDown", 0.15f);
-        audioSource.Play();
-    }
-    private void goDown() {
-        PScript.score -= 2;
-        transform.position = new Vector3(pos.x, 0.1f, pos.z);
+                if (Physics.Raycast(ray, out hit)) {
+                    if (hit.collider.TryGetComponent(out Tile tile))
+                    {
+                        tile.selfdestruct();
+                    }
+                }
+            }
+        }
+        
     }
 }

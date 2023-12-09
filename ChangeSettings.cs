@@ -12,7 +12,6 @@ public class ChangeSettings : MonoBehaviour
     public TMP_Text lprvalue;
 
     public Toggle extraTiles;
-    public Toggle glowing;
 
     private void Start()
     {
@@ -24,7 +23,6 @@ public class ChangeSettings : MonoBehaviour
         bpmslider.value = PlayerPrefs.GetInt("bpm")/30;
         lprslider.value = PlayerPrefs.GetInt("lpr");
 
-        glowing.isOn = intToBool(PlayerPrefs.GetInt("glow"));
         extraTiles.isOn = intToBool(PlayerPrefs.GetInt("et"));
 
     }
@@ -56,12 +54,10 @@ public class ChangeSettings : MonoBehaviour
     }
 
     public void saveChanges() {
-        PlayerPrefs.DeleteAll();
 
         PlayerPrefs.SetInt("gm", gamemode.value);
         PlayerPrefs.SetInt("bpm", (int)bpmslider.value*30);
         PlayerPrefs.SetInt("lpr", (int)lprslider.value);
-        PlayerPrefs.SetInt("glow", boolToInt(glowing));
         PlayerPrefs.SetInt("et", boolToInt(extraTiles));
 
         PlayerPrefs.Save();
